@@ -36,13 +36,31 @@ list_all_versions() {
 	list_github_tags
 }
 
+system() {
+  case $(uname -s) in
+    Darwin) echo "macOS" ;;
+    *) echo "Linux" ;;
+  esac
+}
+
+arch() {
+  case $(uname -m) in
+    amd64 | x86_64) echo "64bit" ;;
+		x86) echo "32bit" ;;
+    aarch64 | aarch64_be | armv8b | armv8l | arm64) echo "ARM64" ;;
+		armv7) echo "ARMv7" ;;
+		armv6) echo "ARMv6" ;;
+    *) fail "Architecture not supported" ;;
+  esac
+}
+
 download_release() {
 	local version filename url
 	version="$1"
 	filename="$2"
 
 	# TODO: Adapt the release URL convention for arduino-cli
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	url="$GH_REPO/releases/download/${version}/${TOOL_NAME}_${version}_$(system)_$(arch).tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
